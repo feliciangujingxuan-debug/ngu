@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>地球小卫士 · 环保闯关游戏</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#8FD8F2;
+    --sky-bottom:#D9F4FF;
+    --grass:#4CAF6D;
+    --grass-dark:#2E8B57;
+    --forest:#1F6650;
+    --sun:#FFC93C;
+    --sun-glow:#FFE08A;
+    --earth:#8B5E3C;
+    --smog:#8d8577;
+    --recycle:#2F8FD6;
+    --kitchen:#4CAF6D;
+    --harmful:#E0554F;
+    --other:#8B7E74;
+    --paper:#FFFDF7;
+    --ink:#1F3B33;
+    --radius:22px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Nunito',sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,253,247,0.85);
+    backdrop-filter:blur(6px);
+    border-bottom:2px solid rgba(31,102,80,0.08);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 24px;max-width:1080px;margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.2rem;color:var(--forest);}
+  .logo-badge{
+    width:38px;height:38px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #7FE0A8, var(--grass-dark));
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+    box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  }
+  .eco-meter{display:flex;align-items:center;gap:10px;}
+  .eco-meter-label{font-size:0.8rem;font-weight:700;color:var(--forest);white-space:nowrap;}
+  .meter-track{
+    width:130px;height:14px;border-radius:20px;background:#E4E9DE;
+    overflow:hidden;border:2px solid rgba(31,102,80,0.15);
+  }
+  .meter-fill{
+    height:100%;width:50%;border-radius:20px;
+    background:linear-gradient(90deg,#7FE0A8,var(--grass-dark));
+    transition:width .6s ease;
+  }
+  @media (max-width:560px){
+    .eco-meter-label{display:none;}
+    .meter-track{width:90px;}
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;}
+  .scene{
+    position:relative;height:min(70vh,520px);min-height:380px;
+    overflow:hidden;
+    background:linear-gradient(180deg,var(--sky-top),var(--sky-bottom) 75%);
+    transition:filter 1s ease;
+  }
+  .smog-layer{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(141,133,119,0.55), rgba(141,133,119,0.15) 70%);
+    opacity:0; transition:opacity 1.2s ease; pointer-events:none;
+  }
+  .sun{
+    position:absolute;top:12%;right:14%;width:90px;height:90px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #FFF3C4, var(--sun));
+    box-shadow:0 0 0 18px rgba(255,201,60,0.18), 0 0 0 36px rgba(255,201,60,0.10);
+    transition:filter 1s ease, opacity 1s ease;
+  }
+  .cloud{position:absolute;opacity:.92;filter:drop-shadow(0 4px 2px rgba(0,0,0,0.05));}
+  .cloud svg{display:block;}
+  .cloud.c1{top:8%;left:8%;width:120px;animation:drift 34s linear infinite;}
+  .cloud.c2{top:20%;left:55%;width:90px;animation:drift 26s linear infinite reverse;}
+  .cloud.c3{top:5%;left:75%;width:70px;animation:drift 40s linear infinite;}
+  @keyframes drift{from{transform:translateX(-30px);}50%{transform:translateX(30px);}to{transform:translateX(-30px);}}
+
+  .hills{position:absolute;bottom:0;left:0;width:100%;}
+  .hills svg{display:block;width:100%;height:auto;}
+
+  .tree{position:absolute;bottom:14%;transform-origin:bottom center;animation:sway 5s ease-in-out infinite;}
+  @keyframes sway{0%,100%{transform:rotate(-1.5deg);}50%{transform:rotate(1.5deg);}}
+
+  .hero-copy{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:0 20px;
+  }
+  .eyebrow{
+    font-weight:800;letter-spacing:.08em;color:var(--forest);background:rgba(255,255,255,0.75);
+    padding:6px 16px;border-radius:20px;font-size:0.85rem;margin-bottom:14px;
+  }
+  .hero-copy h1{
+    font-size:clamp(2rem,6vw,3.4rem);color:var(--forest);margin:0 0 10px;
+    text-shadow:0 3px 0 rgba(255,255,255,0.6);
+  }
+  .hero-copy p{font-size:1.05rem;max-width:520px;margin:0 auto 22px;color:#2b4a40;font-weight:600;}
+  .btn{
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;
+    border:none;cursor:pointer;border-radius:100px;padding:14px 30px;
+    background:var(--sun);color:#5b3a00;box-shadow:0 6px 0 #C98F1D;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #C98F1D;}
+  .btn.secondary{background:var(--grass);color:#fff;box-shadow:0 6px 0 var(--grass-dark);}
+  .btn.secondary:active{box-shadow:0 2px 0 var(--grass-dark);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none;}
+
+  /* ---------- SECTIONS ---------- */
+  section.stage{padding:70px 0 30px;}
+  .stage-head{text-align:center;max-width:640px;margin:0 auto 34px;}
+  .stage-num{
+    display:inline-block;font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;
+    background:var(--grass-dark);border-radius:50%;width:34px;height:34px;line-height:34px;
+    margin-bottom:10px;font-size:1rem;
+  }
+  .stage-head h2{font-size:clamp(1.5rem,3.6vw,2.1rem);color:var(--forest);margin:6px 0 8px;}
+  .stage-head p{color:#5a675f;margin:0;font-weight:600;}
+
+  .panel{
+    background:#fff;border-radius:var(--radius);
+    box-shadow:0 10px 0 rgba(31,102,80,0.06), 0 2px 20px rgba(31,102,80,0.08);
+    padding:28px;border:2px solid rgba(31,102,80,0.06);
+  }
+
+  /* sorting game */
+  .sort-hud{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .hud-chip{
+    background:#F1F6EF;border-radius:14px;padding:8px 16px;font-weight:800;color:var(--forest);
+    font-family:'Baloo 2',sans-serif;font-size:0.95rem;
+  }
+  .trash-stage{
+    display:flex;justify-content:center;align-items:center;min-height:120px;margin-bottom:26px;
+  }
+  .trash-item{
+    font-size:2.6rem;background:#FFFBEF;border:3px solid #F2D98A;border-radius:20px;
+    padding:14px 22px;cursor:default;position:relative;
+    animation:pop .35s ease;
+  }
+  @keyframes pop{from{transform:scale(0.6);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .trash-label{
+    position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
+    font-size:0.85rem;font-weight:700;color:var(--forest);white-space:nowrap;
+  }
+  .bins{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media (max-width:640px){.bins{grid-template-columns:repeat(2,1fr);}}
+  .bin{
+    border:none;border-radius:18px;padding:18px 8px;cursor:pointer;color:#fff;
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:0.95rem;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    transition:transform .12s ease;
+  }
+  .bin:hover{transform:translateY(-3px);}
+  .bin:active{transform:translateY(1px);}
+  .bin span.icon{font-size:1.8rem;}
+  .bin.recycle{background:var(--recycle);}
+  .bin.kitchen{background:var(--kitchen);}
+  .bin.harmful{background:var(--harmful);}
+  .bin.other{background:var(--other);}
+  .feedback-flash{
+    text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;
+    min-height:28px;margin-top:16px;
+  }
+  .feedback-flash.good{color:var(--grass-dark);}
+  .feedback-flash.bad{color:var(--harmful);}
+
+  /* quiz */
+  .quiz-progress{display:flex;gap:6px;margin-bottom:22px;}
+  .quiz-dot{flex:1;height:8px;border-radius:8px;background:#E4E9DE;}
+  .quiz-dot.done{background:var(--grass-dark);}
+  .quiz-q{font-size:1.15rem;font-weight:800;color:var(--forest);margin-bottom:18px;}
+  .quiz-opts{display:grid;gap:12px;}
+  .opt{
+    text-align:left;padding:14px 18px;border-radius:14px;border:2px solid #E4E9DE;
+    background:#FBFBF8;cursor:pointer;font-weight:700;font-size:0.98rem;color:#2b4a40;
+    transition:all .15s ease;
+  }
+  .opt:hover{border-color:var(--grass);}
+  .opt.correct{background:#E4F6E9;border-color:var(--grass-dark);color:var(--forest);}
+  .opt.wrong{background:#FBE7E6;border-color:var(--harmful);color:#7a2b28;}
+  .opt.disabled{pointer-events:none;}
+  .explain{
+    margin-top:16px;background:#FFF8E6;border-left:5px solid var(--sun);border-radius:10px;
+    padding:12px 16px;font-size:0.92rem;color:#5b4a1f;display:none;font-weight:600;
+  }
+
+  /* result */
+  .badge-card{text-align:center;}
+  .badge-emoji{font-size:4.4rem;margin-bottom:8px;display:block;}
+  .badge-title{font-family:'Baloo 2',sans-serif;color:var(--forest);font-size:1.8rem;margin:0 0 6px;}
+  .badge-desc{color:#5a675f;font-weight:600;max-width:480px;margin:0 auto 22px;}
+  .score-line{
+    display:flex;justify-content:center;gap:26px;margin:22px 0;flex-wrap:wrap;
+  }
+  .score-block{text-align:center;}
+  .score-num{font-family:'Baloo 2',sans-serif;font-size:2rem;color:var(--grass-dark);display:block;}
+  .score-cap{font-size:0.85rem;color:#5a675f;font-weight:700;}
+
+  footer{text-align:center;padding:34px 20px 44px;color:#5a675f;font-weight:600;font-size:0.9rem;}
+  footer .foot-emoji{font-size:1.4rem;}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.show{opacity:1;transform:none;}
+
+  .locked-note{
+    text-align:center;color:#8a8378;font-weight:700;padding:30px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo"><span class="logo-badge">🌍</span>地球小卫士</div>
+    <div class="eco-meter">
+      <span class="eco-meter-label">地球健康值</span>
+      <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+      <span id="meterNum" style="font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--forest);">50</span>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="scene" id="scene">
+    <div class="smog-layer" id="smogLayer"></div>
+    <div class="cloud c1"><svg viewBox="0 0 120 60" width="120"><ellipse cx="30" cy="35" rx="28" ry="18" fill="#fff"/><ellipse cx="60" cy="28" rx="34" ry="22" fill="#fff"/><ellipse cx="92" cy="38" rx="24" ry="16" fill="#fff"/></svg></div>
+    <div class="cloud c2"><svg viewBox="0 0 120 60" width="90"><ellipse cx="30" cy="35" rx="28" ry="18" fill="#fff"/><ellipse cx="60" cy="28" rx="30" ry="20" fill="#fff"/></svg></div>
+    <div class="cloud c3"><svg viewBox="0 0 120 60" width="70"><ellipse cx="40" cy="32" rx="30" ry="20" fill="#fff"/></svg></div>
+    <div class="sun" id="sun"></div>
+
+    <div class="tree" id="tree1" style="left:8%;">
+      <svg width="70" height="110" viewBox="0 0 70 110"><rect x="30" y="70" width="10" height="40" fill="#8B5E3C" rx="3"/><circle cx="35" cy="45" r="34" fill="var(--grass-dark)"/><circle cx="18" cy="55" r="22" fill="var(--grass)"/><circle cx="52" cy="55" r="22" fill="var(--grass)"/></svg>
+    </div>
+    <div class="tree" id="tree2" style="right:10%;bottom:12%;animation-delay:1s;">
+      <svg width="54" height="86" viewBox="0 0 70 110"><rect x="30" y="70" width="10" height="40" fill="#8B5E3C" rx="3"/><circle cx="35" cy="45" r="34" fill="var(--grass-dark)"/><circle cx="18" cy="55" r="22" fill="var(--grass)"/><circle cx="52" cy="55" r="22" fill="var(--grass)"/></svg>
+    </div>
+
+    <div class="hills">
+      <svg viewBox="0 0 1000 200" preserveAspectRatio="none">
+        <path d="M0,120 Q250,40 500,110 T1000,90 L1000,200 L0,200 Z" fill="var(--grass)"/>
+        <path d="M0,160 Q260,110 520,160 T1000,140 L1000,200 L0,200 Z" fill="var(--grass-dark)"/>
+      </svg>
+    </div>
+
+    <div class="hero-copy">
+      <span class="eyebrow">环保小任务 · 边玩边学</span>
+      <h1>地球小卫士</h1>
+      <p>地球的天空、河流和森林需要你的帮助！完成两个小任务,把污染赶跑,让天空重新变蓝~</p>
+      <button class="btn" onclick="document.getElementById('game1').scrollIntoView()">🚀 开始闯关</button>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <section class="stage" id="game1">
+    <div class="stage-head reveal">
+      <span class="stage-num">1</span>
+      <h2>垃圾分类大挑战</h2>
+      <p>看清楚每一样垃圾,把它扔进正确的垃圾桶吧!</p>
+    </div>
+    <div class="panel reveal">
+      <div class="sort-hud">
+        <div class="hud-chip">第 <span id="sortRound">1</span> / <span id="sortTotal">12</span> 题</div>
+        <div class="hud-chip">✅ 答对 <span id="sortCorrect">0</span></div>
+      </div>
+      <div class="trash-stage">
+        <div class="trash-item" id="trashItem">🧴<div class="trash-label" id="trashLabel">塑料瓶</div></div>
+      </div>
+      <div class="bins">
+        <button class="bin recycle" data-cat="recycle"><span class="icon">♻️</span>可回收物</button>
+        <button class="bin kitchen" data-cat="kitchen"><span class="icon">🥬</span>厨余垃圾</button>
+        <button class="bin harmful" data-cat="harmful"><span class="icon">⚠️</span>有害垃圾</button>
+        <button class="bin other" data-cat="other"><span class="icon">🗑️</span>其他垃圾</button>
+      </div>
+      <div class="feedback-flash" id="sortFeedback"></div>
+    </div>
+  </section>
+
+  <section class="stage" id="game2">
+    <div class="stage-head reveal">
+      <span class="stage-num">2</span>
+      <h2>环保知识问答</h2>
+      <p>选出正确答案,守护空气、河流和安静的夜晚!</p>
+    </div>
+    <div class="panel reveal" id="quizPanel">
+      <div class="locked-note" id="quizLocked">先完成第一关"垃圾分类大挑战"哦 👆</div>
+    </div>
+  </section>
+
+  <section class="stage" id="result">
+    <div class="stage-head reveal">
+      <span class="stage-num">3</span>
+      <h2>你的环保成绩单</h2>
+      <p>看看你为地球做出了多大的贡献!</p>
+    </div>
+    <div class="panel reveal badge-card" id="resultPanel">
+      <div class="locked-note">完成两个小任务后,这里会出现你的专属勋章 🏅</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-emoji">🌱🌏🌱</div>
+  保护环境,从小事做起 · 每个人都是地球小卫士
+</footer>
+
+<script>
+/* ---------------- 全局环保值 ---------------- */
+let ecoScore = 50;
+const meterFill = document.getElementById('meterFill');
+const meterNum = document.getElementById('meterNum');
+const scene = document.getElementById('scene');
+const smogLayer = document.getElementById('smogLayer');
+const sun = document.getElementById('sun');
+
+function updateEco(delta){
+  ecoScore = Math.max(0, Math.min(100, ecoScore + delta));
+  meterFill.style.width = ecoScore + '%';
+  meterNum.textContent = ecoScore;
+  smogLayer.style.opacity = (100 - ecoScore) / 130;
+  const brightness = 0.75 + (ecoScore/100)*0.4;
+  const saturate = 0.6 + (ecoScore/100)*0.6;
+  scene.style.filter = `brightness(${brightness}) saturate(${saturate})`;
+  sun.style.filter = ecoScore < 35 ? 'grayscale(0.6) brightness(0.8)' : 'none';
+}
+updateEco(0);
+
+/* ---------------- 关卡一:垃圾分类 ---------------- */
+const trashPool = [
+  {name:'塑料瓶', icon:'🧴', cat:'recycle'},
+  {name:'易拉罐', icon:'🥫', cat:'recycle'},
+  {name:'纸箱', icon:'📦', cat:'recycle'},
+  {name:'玻璃瓶', icon:'🍾', cat:'recycle'},
+  {name:'旧报纸', icon:'📰', cat:'recycle'},
+  {name:'苹果核', icon:'🍎', cat:'kitchen'},
+  {name:'菜叶', icon:'🥬', cat:'kitchen'},
+  {name:'鸡蛋壳', icon:'🥚', cat:'kitchen'},
+  {name:'鱼骨头', icon:'🐟', cat:'kitchen'},
+  {name:'剩饭', icon:'🍚', cat:'kitchen'},
+  {name:'废电池', icon:'🔋', cat:'harmful'},
+  {name:'过期药品', icon:'💊', cat:'harmful'},
+  {name:'废灯泡', icon:'💡', cat:'harmful'},
+  {name:'体温计', icon:'🌡️', cat:'harmful'},
+  {name:'杀虫剂罐', icon:'🧪', cat:'harmful'},
+  {name:'烟头', icon:'🚬', cat:'other'},
+  {name:'陶瓷碗', icon:'🍶', cat:'other'},
+  {name:'卫生纸', icon:'🧻', cat:'other'},
+  {name:'灰尘扫土', icon:'🧹', cat:'other'},
+  {name:'旧牙刷', icon:'🪥', cat:'other'},
+];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+const sortRounds = shuffle(trashPool).slice(0, 12);
+let sortIndex = 0;
+let sortCorrectCount = 0;
+let sortDone = false;
+
+document.getElementById('sortTotal').textContent = sortRounds.length;
+
+const trashItemEl = document.getElementById('trashItem');
+const trashLabelEl = document.getElementById('trashLabel');
+const sortFeedback = document.getElementById('sortFeedback');
+
+function renderSortRound(){
+  if(sortIndex >= sortRounds.length){
+    finishSortGame();
+    return;
+  }
+  const item = sortRounds[sortIndex];
+  trashItemEl.style.animation = 'none';
+  void trashItemEl.offsetWidth;
+  trashItemEl.style.animation = 'pop .35s ease';
+  trashItemEl.firstChild.textContent = item.icon;
+  trashLabelEl.textContent = item.name;
+  document.getElementById('sortRound').textContent = sortIndex + 1;
+  sortFeedback.textContent = '';
+}
+renderSortRound();
+
+document.querySelectorAll('.bin').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(sortDone) return;
+    const chosen = btn.dataset.cat;
+    const item = sortRounds[sortIndex];
+    if(chosen === item.cat){
+      sortCorrectCount++;
+      document.getElementById('sortCorrect').textContent = sortCorrectCount;
+      sortFeedback.textContent = '✅ 太棒了!分类正确!';
+      sortFeedback.className = 'feedback-flash good';
+      updateEco(+3);
+    } else {
+      sortFeedback.textContent = `❌ 不对哦,${item.name}应该扔进"${catLabel(item.cat)}"`;
+      sortFeedback.className = 'feedback-flash bad';
+      updateEco(-1);
+    }
+    sortIndex++;
+    setTimeout(renderSortRound, 900);
+  });
+});
+
+function catLabel(cat){
+  return {recycle:'可回收物', kitchen:'厨余垃圾', harmful:'有害垃圾', other:'其他垃圾'}[cat];
+}
+
+function finishSortGame(){
+  sortDone = true;
+  trashItemEl.firstChild.textContent = '🎉';
+  trashLabelEl.textContent = '第一关完成!';
+  sortFeedback.textContent = `你答对了 ${sortCorrectCount} / ${sortRounds.length} 题`;
+  sortFeedback.className = 'feedback-flash good';
+  unlockQuiz();
+}
+
+/* ---------------- 关卡二:环保问答 ---------------- */
+const quizData = [
+  {
+    q:'去超市购物时,下列哪种做法最能减少"白色污染"?',
+    opts:['自带布袋或环保袋','多要几个塑料袋装东西','用完塑料袋直接扔掉','把塑料袋烧掉'],
+    correct:0,
+    tip:'自带布袋可以重复使用很多次,能大大减少一次性塑料袋的使用。'
+  },
+  {
+    q:'工厂如果把废水未经处理直接排入河流,最可能污染什么?',
+    opts:['天空中的云朵','河流和地下水','月亮','沙漠'],
+    correct:1,
+    tip:'未处理的废水含有化学物质,会污染河流,还可能渗入地下水。'
+  },
+  {
+    q:'汽车排放的尾气,是造成下列哪种污染的重要原因?',
+    opts:['噪声污染','空气污染(雾霾)','光污染','土壤污染'],
+    correct:1,
+    tip:'汽车尾气含有大量废气,是形成雾霾、污染空气的重要原因之一。'
+  },
+  {
+    q:'"白色污染"主要指的是什么?',
+    opts:['白色的云朵','一次性塑料袋和塑料餐盒造成的污染','白色的雪','白色的墙壁'],
+    correct:1,
+    tip:'一次性塑料制品难以降解,长期堆积会污染土壤和海洋,被称为"白色污染"。'
+  },
+  {
+    q:'废旧电池如果随意丢弃,会污染什么?',
+    opts:['土壤和水源','天空','声音','阳光'],
+    correct:0,
+    tip:'废电池含有重金属,随意丢弃会渗入土壤和水源,危害植物和小动物。'
+  },
+  {
+    q:'晚上如果街道和楼房灯光过多过亮,会造成什么污染?',
+    opts:['水污染','光污染','土壤污染','噪声污染'],
+    correct:1,
+    tip:'过强过多的灯光会影响人和动物的睡眠,这就是"光污染"。'
+  },
+  {
+    q:'下面哪种行为属于节约用水、减少水污染?',
+    opts:['用洗菜水浇花','把剩菜倒进河里','让水龙头一直开着','把废油倒进下水道'],
+    correct:0,
+    tip:'把洗菜水留下来浇花,既节约用水,又避免了浪费和污染。'
+  },
+  {
+    q:'"噪声污染"主要来自于下面哪种情况?',
+    opts:['安静的图书馆','工地施工和喧闹的交通','轻声的音乐','花园里的鸟鸣'],
+    correct:1,
+    tip:'工地施工、汽车鸣笛等过大的声音会形成噪声污染,影响人们休息和学习。'
+  }
+];
+
+let quizIndex = 0;
+let quizCorrectCount = 0;
+const quizPanel = document.getElementById('quizPanel');
+
+function unlockQuiz(){
+  quizPanel.innerHTML = `
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="quiz-q" id="quizQ"></div>
+    <div class="quiz-opts" id="quizOpts"></div>
+    <div class="explain" id="quizExplain"></div>
+  `;
+  buildProgress();
+  renderQuiz();
+}
+
+function buildProgress(){
+  const p = document.getElementById('quizProgress');
+  p.innerHTML = '';
+  quizData.forEach((_, i)=>{
+    const d = document.createElement('div');
+    d.className = 'quiz-dot' + (i < quizIndex ? ' done' : '');
+    p.appendChild(d);
+  });
+}
+
+function renderQuiz(){
+  if(quizIndex >= quizData.length){
+    finishQuiz();
+    return;
+  }
+  buildProgress();
+  const item = quizData[quizIndex];
+  document.getElementById('quizQ').textContent = `第 ${quizIndex+1} 题:${item.q}`;
+  const optsEl = document.getElementById('quizOpts');
+  optsEl.innerHTML = '';
+  document.getElementById('quizExplain').style.display = 'none';
+  item.opts.forEach((opt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = opt;
+    b.addEventListener('click', ()=>selectQuizOption(idx));
+    optsEl.appendChild(b);
+  });
+}
+
+function selectQuizOption(idx){
+  const item = quizData[quizIndex];
+  const buttons = document.querySelectorAll('#quizOpts .opt');
+  buttons.forEach(b=>b.classList.add('disabled'));
+  if(idx === item.correct){
+    buttons[idx].classList.add('correct');
+    quizCorrectCount++;
+    updateEco(+3);
+  } else {
+    buttons[idx].classList.add('wrong');
+    buttons[item.correct].classList.add('correct');
+    updateEco(-1);
+  }
+  const explain = document.getElementById('quizExplain');
+  explain.textContent = '💡 ' + item.tip;
+  explain.style.display = 'block';
+  setTimeout(()=>{
+    quizIndex++;
+    renderQuiz();
+  }, 1600);
+}
+
+function finishQuiz(){
+  quizPanel.innerHTML = `
+    <div class="badge-emoji">🎉</div>
+    <h3 style="font-family:'Baloo 2',sans-serif;color:var(--forest);">问答完成!</h3>
+    <p style="color:#5a675f;font-weight:600;">你答对了 ${quizCorrectCount} / ${quizData.length} 题</p>
+  `;
+  showResult();
+}
+
+/* ---------------- 结果与勋章 ---------------- */
+function showResult(){
+  const totalRight = sortCorrectCount + quizCorrectCount;
+  const totalQ = sortRounds.length + quizData.length;
+  const pct = totalRight / totalQ;
+
+  let badge, title, desc;
+  if(pct >= 0.85){
+    badge = '🏆'; title = '环保大使';
+    desc = '你对环保知识和垃圾分类都非常熟悉,是当之无愧的环保大使!快把这份认真带回家,影响身边的人吧。';
+  } else if(pct >= 0.6){
+    badge = '🥈'; title = '环保小卫士';
+    desc = '你已经掌握了不少环保小知识,继续加油,离环保大使只差一点点啦!';
+  } else {
+    badge = '🌱'; title = '环保新星';
+    desc = '万事开头难,你已经迈出了保护地球的第一步,多复习一下垃圾分类和环保小知识,下次会更棒!';
+  }
+
+  document.getElementById('resultPanel').innerHTML = `
+    <span class="badge-emoji">${badge}</span>
+    <h3 class="badge-title">${title}</h3>
+    <p class="badge-desc">${desc}</p>
+    <div class="score-line">
+      <div class="score-block"><span class="score-num">${sortCorrectCount}/${sortRounds.length}</span><span class="score-cap">垃圾分类</span></div>
+      <div class="score-block"><span class="score-num">${quizCorrectCount}/${quizData.length}</span><span class="score-cap">环保问答</span></div>
+      <div class="score-block"><span class="score-num">${ecoScore}</span><span class="score-cap">地球健康值</span></div>
+    </div>
+    <button class="btn secondary" onclick="location.reload()">🔁 再玩一次</button>
+  `;
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ---------------- 滚动动画 ---------------- */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add('show');
+  });
+}, {threshold:0.15});
+revealEls.forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
